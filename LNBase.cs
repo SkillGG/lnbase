@@ -1,18 +1,30 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using lnbase.Base;
+using ITW.Exts;
 
 namespace lnbase {
 	/// <summary>
 	/// This is the main type for your game.
 	/// </summary>
 	public class LNBase : Game {
+
+
 		GraphicsDeviceManager graphics;
 		SpriteBatch spriteBatch;
 
+		public InputStates inputs;
+
+		public GameBase GameBase {get; private set;}
+
 		public LNBase() {
+
 			graphics = new GraphicsDeviceManager(this);
 			Content.RootDirectory = "Content";
+
+			GameBase = new GameBase( );
+
 		}
 
 		/// <summary>
@@ -23,6 +35,8 @@ namespace lnbase {
 		/// </summary>
 		protected override void Initialize() {
 			// TODO: Add your initialization logic here
+			
+			inputs = new InputStates( );
 
 			base.Initialize( );
 		}
@@ -58,6 +72,8 @@ namespace lnbase {
 			// TODO: Add your update logic here
 
 			base.Update(gameTime);
+
+			inputs.Update( );
 		}
 
 		/// <summary>
