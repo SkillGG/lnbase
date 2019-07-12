@@ -1,0 +1,23 @@
+
+Game#Init [FirstScene#Init]
+	#Init (SceneType.bef())
+	:loop
+	#Wait (SceneType.updatepace)
+	#Update (SceneType.upt())
+	#Update=>False
+	#loop
+	#Update=>True
+	#End (SceneType.aft())
+	:condition
+	#Condition (Condition)
+	#Condition=>False
+	#condition
+	#Condition=>True
+	#TerminateAllTimers()
+	#NextTerminates()
+	#Nextterminates=>True
+	#escape
+	#NextTerminates=>False
+	Next#Init()
+:escape
+#Terminate (Game.Terminate())

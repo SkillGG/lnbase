@@ -1,0 +1,24 @@
+#first
+.150.(me)Why am I here?
+
+=> Click
+
+#second
+()
+@Cycle #0
+@Cycle #1
+@Cycle #2
+@Cycle #3
+@Cycle #4
+@Cycle #5
+.(you)I dont know.
+
+=>Click
+
+#end
+@End!
+.()Its the end!
+
+=>Click
+
+[Terminate]
