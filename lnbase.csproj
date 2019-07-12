@@ -41,15 +41,18 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Base\GameScene.cs" />
+    <Compile Include="Base\GameSprite.cs" />
+    <Compile Include="Base\SceneBackground.cs" />
+    <Compile Include="Base\SceneBars.cs" />
+    <Compile Include="Base\SceneHandler.cs" />
     <Compile Include="Exts\AnimatedSprite.cs" />
     <Compile Include="Base\GameBase.cs" />
     <Compile Include="Exts\InputStates.cs" />
     <Compile Include="Exts\Lines.cs" />
-    <Compile Include="GameResources\GameText.cs" />
     <Compile Include="LNBase.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scene\GameScene.cs" />
     <Compile Include="Exts\StringDrawn.cs" />
     <Compile Include="Exts\StringRectangle.cs" />
   </ItemGroup>
