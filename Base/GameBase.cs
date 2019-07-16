@@ -1,5 +1,6 @@
 ﻿using ITW.Exts;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace lnbase.Base {
 	public class GameBase {
@@ -15,59 +16,68 @@ namespace lnbase.Base {
 		public enum TerminateState { ON }
 		public const TerminateState Terminate = TerminateState.ON;
 
+		public InputStates InputStates { get; private set; }
 
-		public GameBase() {
+		private LNBase Parent;
+
+		public GameBase(LNBase p) {
 			Loaded = false;
+			Parent = p;
+			Scenes = new SceneHandler(this);
 		}
 
 		public GameScene GenerateScene(
 			string id, string text, string name,
-			SceneType t, SceneBackground bg, SceneBars br, SpriteFont f,
+			GameScene.SceneType t, SceneBackground bg, SceneBars br, SpriteFont f,
 			SceneHandler.Flag flag = SceneHandler.Flag.MIDDLE
-		){
-			return new GameScene(id,text,name,t,bg,br,f,flag);
+		) {
+			return new GameScene(id, text, name, t, bg, br, f, flag);
 		}
 
 		public void FirstScene(string text = "", string name = "",
-			SceneType type = null, SceneBackground bckg = null, SceneBars bars = null,
+			GameScene.SceneType type = null, SceneBackground bckg = null, SceneBars bars = null,
 			SpriteFont font = null
 		) {
 			Scenes.Add(GenerateScene(
 				id: "first", text: text, name: name,
-				t: type ? new SceneType( ), bg: bckg ? DefaultBCKG, br: bars ? DefaultBARS, f: font ? DefaultFONT,
+				t: type ?? new GameScene.SceneType(Scenes), bg: bckg ?? DefaultBCKG,
+				br: bars ?? DefaultBARS, f: font ?? DefaultFONT,
 				flag: SceneHandler.Flag.FIRST
 			));
 		}
 
 		public void EndScene(string text = "", string name = "",
-			SceneType type = null, SceneBackground bckg = null, SceneBars bars = null,
+			GameScene.SceneType type = null, SceneBackground bckg = null, SceneBars bars = null,
 			SpriteFont font = null
 		) {
 			Scenes.Add(GenerateScene(
 				id: "end", text: text, name: name,
-				t: type ? new SceneType( ), bg: bckg ? DefaultBCKG, br: bars ? DefaultBARS, f: font ? DefaultFONT,
+				t: type ?? new GameScene.SceneType(Scenes), bg: bckg ?? DefaultBCKG,
+				br: bars ?? DefaultBARS, f: font ?? DefaultFONT,
 				flag: SceneHandler.Flag.END
 			));
 		}
 
 		public void ErrorScene(string text = "", string name = "",
-			SceneType type = null, SceneBackground bckg = null, SceneBars bars = null,
+			GameScene.SceneType type = null, SceneBackground bckg = null, SceneBars bars = null,
 			SpriteFont font = null
-		){
+		) {
 			Scenes.Add(GenerateScene(
 				id: "end", text: text, name: name,
-				t: type ? new SceneType( ), bg: bckg ? DefaultBCKG, br: bars ? DefaultBARS, f: font ? DefaultFONT,
+				t: type ?? new GameScene.SceneType(Scenes), bg: bckg ?? DefaultBCKG,
+				br: bars ?? DefaultBARS, f: font ?? DefaultFONT,
 				flag: SceneHandler.Flag.ERROR
 			));
 		}
 
 		public void NewScene(
 			string id, string text = "", string name = "",
-			SceneType type = null, SceneBackground bckg = null, SceneBars bars = null, SpriteFont font = null
-		){
+			GameScene.SceneType type = null, SceneBackground bckg = null, SceneBars bars = null, SpriteFont font = null
+		) {
 			Scenes.Add(GenerateScene(
 				id: id, text: text, name: name,
-				t: type ? new SceneType( ), bg: bckg ? DefaultBCKG, br: bars ? DefaultBARS, f: font ? DefaultFONT,
+				t: type ?? new GameScene.SceneType(Scenes), bg: bckg ?? DefaultBCKG,
+				br: bars ?? DefaultBARS, f: font ?? DefaultFONT,
 				flag: SceneHandler.Flag.MIDDLE
 			));
 		}
@@ -79,21 +89,24 @@ namespace lnbase.Base {
 			DefaultBARS = defBARS;
 			DefaultFONT = defFONT;
 			Loaded = true;
-
+			Scenes.SetSceneDefaults(defBCKG, defBARS, defFONT);
 		}
 
-		public void Start(){
+		public void Start() {
 			Scenes.Start( );
 		}
 
-		public void Draw(SpriteBatch sb){
-			Scenes.Current.Draw( );
+		public void Quit(){
+			Parent.Exit( );
 		}
 
-		public InputStates inputStates { get; private set; }
+		public void Draw(SpriteBatch sb) {
+			Scenes.Current?.Draw(sb);
+		}
 
-		public void Update(InputStates bef){
-			inputStates = bef;
+		public void Update(InputStates bef) {
+			InputStates = bef;
+			Scenes.Current?.Update(bef);
 		}
 
 	}

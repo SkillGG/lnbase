@@ -14,23 +14,28 @@ namespace lnbase {
 		// SCREEN
 		private const int DEFRES = 1366;
 		private readonly int[] useRes = new int[2] { DEFRES, DEFRES / 16 * 9 };
-		private bool fullScreen = true;
+		private bool fullScreen = false;
 		private bool borderLess = true;
 		public int WIDTH { get => this.useRes[0]; private set { this.useRes[0] = value; } }
 		public int HEIGHT { get => this.useRes[1]; private set { this.useRes[1] = value; } }
 		public bool FULLSCREEN { get => this.fullScreen; private set { this.fullScreen = value; } }
 		public bool BORDERLESS { get => this.borderLess; private set { this.borderLess = value; } }
 
+		// Static resolution (from default resolution)
+		public static int CW = DEFRES;
+		public static int CH = DEFRES / 16 * 9;
+
 		public Color BACKGROUND { get; set; }
 
 		private bool FirstUpdate { get; set; }
 
-		public void ChangeGameResolution(int? w, int? h, bool? FS, bool? BL) {
-			string pl = "Multris#ChangeGameResolution";
+		public void ChangeGameResolution(int? w = null, int? h = null, bool? FS = null, bool? BL = null) {
 			this.WIDTH = w ?? this.WIDTH;
 			this.HEIGHT = h ?? this.HEIGHT;
 			this.FULLSCREEN = FS ?? this.FULLSCREEN;
 			this.BORDERLESS = BL ?? this.BORDERLESS;
+			CW = WIDTH;
+			CH = HEIGHT;
 			// Save game res
 			this.graphics.PreferredBackBufferHeight = HEIGHT;
 			this.graphics.PreferredBackBufferWidth = WIDTH;
@@ -38,6 +43,30 @@ namespace lnbase {
 			Window.IsBorderless = BORDERLESS;
 			this.graphics.ApplyChanges( );
 		}
+
+		public double RevertFactor(double? d) {
+			double r = d ?? 0.75;
+			int count = BitConverter.GetBytes(decimal.GetBits((decimal) r)[3])[2];
+			double b = Math.Pow(10, count);
+			double a = r * b;
+			return b / a;
+		}
+
+		public void ChangeGameResolution(int? w = null, double? res = null, bool? FS = null, bool? BL = null) {
+			this.WIDTH = w ?? this.WIDTH;
+			this.HEIGHT = (int) ( w / RevertFactor(res) );
+			this.FULLSCREEN = FS ?? this.FULLSCREEN;
+			this.BORDERLESS = BL ?? this.BORDERLESS;
+			CW = WIDTH;
+			CH = HEIGHT;
+			// Save game res
+			this.graphics.PreferredBackBufferHeight = HEIGHT;
+			this.graphics.PreferredBackBufferWidth = WIDTH;
+			this.graphics.IsFullScreen = FULLSCREEN;
+			Window.IsBorderless = BORDERLESS;
+			this.graphics.ApplyChanges( );
+		}
+
 		// SCREEN
 
 		GraphicsDeviceManager graphics;
@@ -48,9 +77,6 @@ namespace lnbase {
 		public GameBase GameBase { get; private set; }
 
 		public LNBase() {
-
-			graphics = new GraphicsDeviceManager(this);
-			Content.RootDirectory = "Content";
 
 			graphics = new GraphicsDeviceManager(this);
 			Content.RootDirectory = "Content";
@@ -75,12 +101,12 @@ namespace lnbase {
 			// setup flags
 			FirstUpdate = false;
 
-			GameBase = new GameBase( );
+			GameBase = new GameBase(this);
 
 			GameBase.FirstScene(
 				name: "me",
 				text: "Why am I here?",
-				type: new GameBase.SceneType(150)   // type each char at 150 speed
+				type: new GameScene.SceneType(GameBase.Scenes, 150)   // type each char at 150 speed
 
 			// bckg: null // default
 			);
@@ -109,6 +135,11 @@ namespace lnbase {
 			// Create a new SpriteBatch, which can be used to draw textures.
 			spriteBatch = new SpriteBatch(GraphicsDevice);
 
+			// Click condition function
+			bool Click(InputStates bef, GameScene.SceneValues sv) =>
+				bef.MouseReleased(new InputStates( )).Button == MouseButton.LEFT
+					? true : false;
+
 			// TODO: use this.Content to load your game content here
 
 			GameBase.LoadContent(
@@ -125,15 +156,15 @@ namespace lnbase {
 				"second",
 				name: "You",
 				text: "I don't know",
-				type: new GameBase.SceneType(
+				type: new GameScene.SceneType(GameBase.Scenes,
 					updatepace: 50,
 					bef: () => { }, // before starting showing
-					upt: (int cycle, SceneValues sv) => {     // each 50ms
+					upt: (int cycle, GameScene.SceneValues sv) => {     // each 50ms
 
 						// return true = end of every scene
 						Console.WriteLine($"Cycle #{cycle}");
 						if( cycle >= 5 ) {
-							sv.TextVisible(sv.FullText);
+							sv.SetVisible(sv.FullLength);
 							return true;
 						} else
 							return false;
@@ -143,29 +174,19 @@ namespace lnbase {
 			// bckg: null // default
 			);
 
-			bool Click(InputStates bef) =>
-				bef.MouseReleased(new InputStates( )).Button == MouseButton.LEFT
-					? true : false;
-
 			GameBase.EndScene(
-				id: "end",
 				name: "",
 				text: "Its the end!",
-				type: new GameBase.SceneType( )
+				type: new GameScene.SceneType(GameBase.Scenes)
 			);
 
-			GameBase.Scenes["end"].Next(GameBase.Terminate);
+			GameBase.Scenes.First.Condition(Click);             // after CLICK
+			GameBase.Scenes["second"].Condition(Click);         // after CLICK
+			GameBase.Scenes["end"].Condition(Click);            // after CLICK
 
-			GameBase.Scenes["second"].Next(
-				GameBase.Scenes["end"]
-			);
-
-			GameBase.Scenes.First.Next(
-				GameBase.Scenes["second"]
-			);
-
-			GameBase.Scenes["second"].Condition(Click);
-			GameBase.Scenes.First.Condition(Click);
+			GameBase.Scenes.First.Next(GameBase.Scenes["second"]);                  // after click goto "second"
+			GameBase.Scenes["second"].Next(GameBase.Scenes[SceneHandler.Flag.END]); // after click goto EndScene
+			GameBase.Scenes["end"].Next(GameBase.Terminate);                        // after click TERMINATEs
 
 		}
 
@@ -189,11 +210,15 @@ namespace lnbase {
 			// TODO: Add your update logic here
 
 			if( FirstUpdate ) {
-				GameBase.Start( );
-				FirstUpdate = true;
+				if( GameBase.Scenes.First != null ) {
+					GameBase.Start( );
+					FirstUpdate = false;
+				}
 			}
 
-			GameBase.Update(inputs);
+			if( !FirstUpdate ) {
+				GameBase.Update(inputs);
+			}
 
 			base.Update(gameTime);
 
@@ -211,11 +236,14 @@ namespace lnbase {
 
 			spriteBatch.Begin( );
 
-			GameBase.Draw(spriteBatch);
+			if( !FirstUpdate ) {
+				GameBase.Draw(spriteBatch);
+			}
 
 			spriteBatch.End( );
 
 			base.Draw(gameTime);
 		}
+
 	}
 }

@@ -1,7 +1,7 @@
 #first
 .150.(me)Why am I here?
 
-=> Click
+=> Click #second
 
 #second
 ()
@@ -13,12 +13,10 @@
 @Cycle #5
 .(you)I dont know.
 
-=>Click
+=>Click #end
 
 #end
 @End!
 .()Its the end!
 
-=>Click
-
-[Terminate]
+=>Click [Terminate]

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace lnbase.Base {
 	public class SceneHandler {
@@ -8,7 +9,8 @@ namespace lnbase.Base {
 		public GameScene Error { get => this[Flag.ERROR]; }
 
 		private string current = null;
-		public GameScene Current{ get => this[current??""]; }
+		public string CRR { get => current; }
+		public GameScene Current { get => this[current ?? ""]; }
 
 		public enum Flag {
 			FIRST, MIDDLE, END, ERROR
@@ -18,7 +20,7 @@ namespace lnbase.Base {
 
 		public GameScene this[string s] {
 			get {
-				if( s == null )
+				if( s == null || s == "" )
 					return null;
 				return allScenes.Find((GameScene gs) => gs.ID == s);
 			}
@@ -30,18 +32,49 @@ namespace lnbase.Base {
 			}
 		}
 
+		public void Next(GameScene ngs) {
+			if( allScenes.Contains(ngs) ) {
+				current = ngs.ID;
+			}
+		}
+
+		private GameBase Base;
+		public void Terminate() {
+			Base.Quit( );
+		}
+
 		public void Add(GameScene gs) {
 			if( this[gs.ID] != null ) {
 				// error
 				return;
 			}
-			if( current == null )
-				current = gs.ID;
 			allScenes.Add(gs);
+			if( gs.FLAG == Flag.FIRST )
+				current = gs.ID;
 		}
 
-		public SceneHandler() {
+		public void Start() {
+			Next(this[Flag.FIRST] ?? allScenes[0]);
+			if( Current == null )
+				Terminate( );
+			Current.Start( );
+		}
+
+		public SceneHandler(GameBase gb) {
 			allScenes = new List<GameScene>( );
+			Base = gb;
+		}
+
+		public SceneBackground DefaultBCKG { get; private set; }
+		public SceneBars DefaultBARS { get; private set; }
+		public SpriteFont DefaultFONT { get; private set; }
+
+		public void SetSceneDefaults(SceneBackground defBCKG, SceneBars defBARS, SpriteFont defFONT) {
+			if( defBCKG != null || DefaultBARS != null || defFONT != null )
+				return;
+			DefaultBCKG = defBCKG;
+			DefaultBARS = defBARS;
+			DefaultFONT = defFONT;
 		}
 
 	}
