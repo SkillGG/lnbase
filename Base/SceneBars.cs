@@ -38,9 +38,23 @@ namespace lnbase.Base {
 			return sb.ToString( );
 		}
 
+		/// <summary>
+		/// Returns number of lines that will fit into given height
+		/// </summary>
+		/// <param name="f"></param>
+		/// <param name="height"></param>
+		/// <returns></returns>
 		public int WrapLines(SpriteFont f, float height) =>
 			(int) Math.Floor((double) ( height / f.MeasureString("U").Y ));
-
+		
+		/// <summary>
+		/// Draws string with WordWrap
+		/// </summary>
+		/// <param name="sb"></param>
+		/// <param name="font"></param>
+		/// <param name="text"></param>
+		/// <param name="rect"></param>
+		/// <param name="c"></param>
 		public void DrawWrappedString(SpriteBatch sb, SpriteFont font, string text, Rectangle rect, Color c) {
 			string wrapped = WrapText(font, text, rect.Width);
 			string[] lines = wrapped.Split('\n');
@@ -63,6 +77,16 @@ namespace lnbase.Base {
 			}
 		}
 
+		/// <summary>
+		/// Draws Bars and its Text and Name
+		/// </summary>
+		/// <param name="sb"></param>
+		/// <param name="font"></param>
+		/// <param name="dest"></param>
+		/// <param name="n"></param>
+		/// <param name="t"></param>
+		/// <param name="nc"></param>
+		/// <param name="tc"></param>
 		public void Draw(SpriteBatch sb, SpriteFont font,
 		Rectangle dest,
 		string n, string t,

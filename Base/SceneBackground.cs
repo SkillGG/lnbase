@@ -10,6 +10,11 @@ namespace lnbase.Base {
 			Texture = txt;
 		}
 
+		/// <summary>
+		/// Draws Backgeound image
+		/// </summary>
+		/// <param name="sb"></param>
+		/// <param name="dest"></param>
 		public void Draw(SpriteBatch sb, Rectangle? dest = null) {
 			sb.Draw(Texture.Texture, dest ?? new Rectangle(0, 0, LNBase.CW, LNBase.CH), Texture.Source, Color.White);
 		}
