@@ -1,0 +1,84 @@
+﻿//////////////////////////////////////
+LOAD AND SETUP
+//////////////////////////////////////
+GameBase.LoadContent(sb, sr, sf);	// Loads default values for SceneBacgkround, SceneBars and Scene's Font
+///
+//	FirstScene( [string], [string], [SceneType], [SceneBackground], [SceneBars], [SpriteFont] )
+//	Sets first scene in the hierarchy of Scenes.
+//	This scene will be available to control via GameBase.Scenes.First
+//	This scene willl be first scene that will be showed after calling GameBase.Start()
+///
+GameBase.FirstScene(
+	name: "me",
+	text: "Why am I here?",
+	type: new GameScene.SceneType(GameBase.Scenes, 150)   // type each char at 150 speed
+);
+///
+//	NewScene( string, [string], [string], [SceneType], [SceneBackground], [SceneBars], [SpriteFont] )
+//	Adding new scene to list of scenes.
+//	This do not imply the continuity of Scenes.
+//	Scenes' line-up is solely determined via command Scene.Next()
+///
+GameBase.NewScene(
+	"second",
+	name: "You",
+	text: "I don't know",
+	type: new GameScene.SceneType(GameBase.Scenes,
+		updatepace: 50,
+		upt: (int cycle, GameScene.SceneValues sv) => {     // each 50ms
+
+			// return true = end of every scene
+			if( cycle >= 5 ) {
+				sv.SetVisible(sv.FullLength);
+				return true;
+			} else
+				return false;
+		}
+	)
+);
+///
+//	EndScene()
+//	Adding last scene to the pulley. This should be done only when there will be no tour changes afterwards.
+//	Scene here will be accessible under GameBase.Scenes.Last
+//	This scene will have its next scene set to Terminate. 
+///
+GameBase.EndScene(
+	name: "",
+	text: "Its the end!",
+	type: new GameScene.SceneType(GameBase.Scenes)
+);
+///
+// Setting queue of Scenes
+///
+GameBase.Scenes.First.Next(GameBase.Scenes["second"]);
+GameBase.Scenes["second"].Next(GameBase.Scenes.Last);
+
+// Click condition functions
+bool Click(InputStates i, GameScene.SceneValues sv) {
+	InputStates ni = new InputStates( );
+	if( ni.MouseReleased(i).Button == MouseButton.LEFT )
+		return true;
+	return false;
+}
+
+bool Enter(InputStates i, GameScene.SceneValues sv) {
+	InputStates ni = new InputStates( );
+	if( ni.KeyUp(i, Keys.Enter) )
+		return true;
+	return false;
+}
+// Setting ending condition for each scene
+GameBase.Scenes.First.Condition(Enter);		// after .upt: returns true player has to click Enter to go to next scene
+GameBase.Scenes["second"].Condition(Enter);
+GameBase.Scenes.Last.Condition(Click);		// after .upt: returns true player has to click LMB to go to next scene
+//////////////////////////////////////
+DRAW & UPDATE
+//////////////////////////////////////
+if(GameBase.Started){
+	GameBase.Update(inputs);
+	GameBase.Draw(spriteBatch);
+}
+//////////////////////////////////////
+START DRAWING FIRST
+//////////////////////////////////////
+GameBase.Start( );

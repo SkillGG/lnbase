@@ -140,14 +140,14 @@ namespace lnbase {
 			GameBase.FirstScene(
 				name: "me",
 				text: "Why am I here?",
-				type: new GameScene.SceneType(GameBase.Scenes, 150)   // type each char at 150 speed
+				behav: new GameScene.SceneBehaviour(GameBase.Scenes, 150)   // type each char at 150 speed
 			);
 
 			GameBase.NewScene(
 				"second",
 				name: "You",
 				text: "I don't know",
-				type: new GameScene.SceneType(GameBase.Scenes,
+				behav: new GameScene.SceneBehaviour(GameBase.Scenes,
 					updatepace: 50,
 					upt: (int cycle, GameScene.SceneValues sv) => {     // each 50ms
 
@@ -165,12 +165,11 @@ namespace lnbase {
 			GameBase.EndScene(
 				name: "",
 				text: "Its the end!",
-				type: new GameScene.SceneType(GameBase.Scenes)
+				behav: new GameScene.SceneBehaviour(GameBase.Scenes)
 			);
 
 			GameBase.Scenes.First.Next(GameBase.Scenes["second"]);
 			GameBase.Scenes["second"].Next(GameBase.Scenes.Last);
-			GameBase.Scenes.Last.Next(GameBase.Terminate);
 
 			// Click condition function
 			bool Click(InputStates i, GameScene.SceneValues sv) {
@@ -239,11 +238,7 @@ namespace lnbase {
 
 			spriteBatch.Begin( );
 
-			if( !FirstUpdate ) {
-				//GameBase.Draw(spriteBatch);
-			}
-
-			if( activated )
+			if( GameBase.Started )
 				GameBase.Draw(spriteBatch);
 
 			spriteBatch.End( );

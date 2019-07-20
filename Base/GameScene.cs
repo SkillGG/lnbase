@@ -10,13 +10,15 @@ namespace lnbase.Base {
 		public string ID { get; private set; }
 		public SceneHandler.Flag FLAG { get; private set; }
 
-		public SceneType TYPE { get; private set; }
+		public SceneBehaviour TYPE { get; private set; }
 
 		public SceneBackground BCKG { get; private set; }
 		public SceneBars BARS { get; private set; }
 		public SpriteFont FONT { get; private set; }
 
 		public SceneValues VALUES { get; private set; }
+
+		private bool Locked { get; set; }
 
 		public void Draw(SpriteBatch sb) {
 			( BCKG ?? TYPE.Parent.DefaultBCKG )?.Draw(sb);
@@ -27,9 +29,9 @@ namespace lnbase.Base {
 		}
 
 		public GameScene(string id, string text, string name,
-			SceneType t, SceneBackground bg, SceneBars br, SpriteFont f,
+			SceneBehaviour t, SceneBackground bg, SceneBars br, SpriteFont f,
 			SceneHandler.Flag flag) {
-
+			Locked = false;
 			ID = id;
 			VALUES = new SceneValues(name, text);
 			TYPE = t;
@@ -41,12 +43,18 @@ namespace lnbase.Base {
 
 		public GameScene NextScene { get; private set; }
 
+		public void Lock() {
+			Locked = true;
+		}
+
 		public void Next(GameScene gs) {
-			NextScene = gs;
+			if( !Locked )
+				NextScene = gs;
 		}
 
 		public void Next(GameBase.TerminateState t) {
-			NextScene = null;
+			if( !Locked )
+				NextScene = null;
 		}
 
 		public void ShowNext() {
@@ -98,7 +106,7 @@ namespace lnbase.Base {
 
 		}
 
-		public class SceneType {
+		public class SceneBehaviour {
 
 			public Timer MainClock { get; private set; }
 
@@ -123,7 +131,7 @@ namespace lnbase.Base {
 					UpdateClick(sv);
 			}
 
-			public SceneType(SceneHandler sh) {
+			public SceneBehaviour(SceneHandler sh) {
 				Period = 0;
 				Parent = sh;
 				Before = () => { };
@@ -135,7 +143,7 @@ namespace lnbase.Base {
 				Reset( );
 			}
 
-			public SceneType(SceneHandler sh,
+			public SceneBehaviour(SceneHandler sh,
 				int updatepace = 100,
 				Func<int, SceneValues, bool> upt = null,
 				Action aft = null,
