@@ -35,7 +35,7 @@ namespace lnbase.Base {
 			TYPE = t;
 			BCKG = bg;
 			BARS = br;
-			FONT = FONT;
+			FONT = f;
 			FLAG = flag;
 		}
 

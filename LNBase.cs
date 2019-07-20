@@ -76,6 +76,8 @@ namespace lnbase {
 
 		public GameBase GameBase { get; private set; }
 
+		private GameScene test_gs;
+
 		public LNBase() {
 
 			graphics = new GraphicsDeviceManager(this);
@@ -101,16 +103,7 @@ namespace lnbase {
 			// setup flags
 			FirstUpdate = false;
 
-			GameBase = new GameBase(this);
-
-			GameBase.FirstScene(
-				name: "me",
-				text: "Why am I here?",
-				type: new GameScene.SceneType(GameBase.Scenes, 150)   // type each char at 150 speed
-
-			// bckg: null // default
-			);
-
+			// GameBase = new GameBase(this);
 		}
 
 		/// <summary>
@@ -135,13 +128,26 @@ namespace lnbase {
 			// Create a new SpriteBatch, which can be used to draw textures.
 			spriteBatch = new SpriteBatch(GraphicsDevice);
 
+			test_gs = new GameScene(
+
+				"test", "Now there will be a bit more text so that i can test if its good spped.", "name",
+				new GameScene.SceneType(new SceneHandler(new GameBase(this)), 100),
+				new SceneBackground(new GameSprite(Content.Load<Texture2D>("background"))),
+				new SceneBars(new GameSprite(Content.Load<Texture2D>("bars")), new Rectangle(200,200,300,300)),
+				Content.Load<SpriteFont>("Fira"),
+				SceneHandler.Flag.FIRST
+
+			);
+
+			/*
+
 			// Click condition function
 			bool Click(InputStates bef, GameScene.SceneValues sv) =>
 				bef.MouseReleased(new InputStates( )).Button == MouseButton.LEFT
 					? true : false;
-
+			*/
 			// TODO: use this.Content to load your game content here
-
+			/*
 			GameBase.LoadContent(
 				defBCKG: new SceneBackground(new GameSprite(txt: Content.Load<Texture2D>("background"))),
 				defBARS: new SceneBars(
@@ -150,6 +156,14 @@ namespace lnbase {
 					text: new Rectangle?( )
 				),
 				defFONT: Content.Load<SpriteFont>("Fira")
+			);
+			
+			GameBase.FirstScene(
+				name: "me",
+				text: "Why am I here?",
+				type: new GameScene.SceneType(GameBase.Scenes, 150)   // type each char at 150 speed
+
+			// bckg: null // default
 			);
 
 			GameBase.NewScene(
@@ -187,7 +201,8 @@ namespace lnbase {
 			GameBase.Scenes.First.Next(GameBase.Scenes["second"]);                  // after click goto "second"
 			GameBase.Scenes["second"].Next(GameBase.Scenes[SceneHandler.Flag.END]); // after click goto EndScene
 			GameBase.Scenes["end"].Next(GameBase.Terminate);                        // after click TERMINATEs
-
+			
+			 */
 		}
 
 		/// <summary>
@@ -210,14 +225,17 @@ namespace lnbase {
 			// TODO: Add your update logic here
 
 			if( FirstUpdate ) {
-				if( GameBase.Scenes.First != null ) {
-					GameBase.Start( );
-					FirstUpdate = false;
-				}
+				//if( GameBase.Scenes.First != null ) {
+				//GameBase.Start( );
+				FirstUpdate = false;
+				//}
 			}
 
+			if( gameTime.TotalGameTime.Ticks > 200 && !activated )
+				FirstClick( );
+
 			if( !FirstUpdate ) {
-				GameBase.Update(inputs);
+				//GameBase.Update(inputs);
 			}
 
 			base.Update(gameTime);
@@ -237,12 +255,23 @@ namespace lnbase {
 			spriteBatch.Begin( );
 
 			if( !FirstUpdate ) {
-				GameBase.Draw(spriteBatch);
+				//GameBase.Draw(spriteBatch);
 			}
+
+			if( test_gs != null && activated )
+				test_gs.Draw(spriteBatch);
 
 			spriteBatch.End( );
 
 			base.Draw(gameTime);
+		}
+
+		private bool activated = false;
+
+		private void FirstClick(){
+			activated = true;
+			Console.WriteLine("FC");
+			test_gs.Start( );
 		}
 
 	}
