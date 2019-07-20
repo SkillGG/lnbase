@@ -31,7 +31,12 @@ namespace lnbase.Base {
 			GameScene.SceneType t, SceneBackground bg, SceneBars br, SpriteFont f,
 			SceneHandler.Flag flag = SceneHandler.Flag.MIDDLE
 		) {
-			return new GameScene(id, text, name, t, bg, br, f, flag);
+			return new GameScene(id, text, name, t,
+				bg ?? t.Parent.DefaultBCKG,
+				br ?? t.Parent.DefaultBARS,
+				f ?? t.Parent.DefaultFONT,
+				flag
+			);
 		}
 
 		public void FirstScene(string text = "", string name = "",
@@ -40,8 +45,8 @@ namespace lnbase.Base {
 		) {
 			Scenes.Add(GenerateScene(
 				id: "first", text: text, name: name,
-				t: type ?? new GameScene.SceneType(Scenes), bg: bckg ?? DefaultBCKG,
-				br: bars ?? DefaultBARS, f: font ?? DefaultFONT,
+				t: type ?? new GameScene.SceneType(Scenes),
+				bg: bckg, br: bars, f: font,
 				flag: SceneHandler.Flag.FIRST
 			));
 		}
@@ -52,8 +57,8 @@ namespace lnbase.Base {
 		) {
 			Scenes.Add(GenerateScene(
 				id: "end", text: text, name: name,
-				t: type ?? new GameScene.SceneType(Scenes), bg: bckg ?? DefaultBCKG,
-				br: bars ?? DefaultBARS, f: font ?? DefaultFONT,
+				t: type ?? new GameScene.SceneType(Scenes),
+				bg: bckg, br: bars, f: font,
 				flag: SceneHandler.Flag.END
 			));
 		}
@@ -64,8 +69,8 @@ namespace lnbase.Base {
 		) {
 			Scenes.Add(GenerateScene(
 				id: "end", text: text, name: name,
-				t: type ?? new GameScene.SceneType(Scenes), bg: bckg ?? DefaultBCKG,
-				br: bars ?? DefaultBARS, f: font ?? DefaultFONT,
+				t: type ?? new GameScene.SceneType(Scenes),
+				bg: bckg, br: bars, f: font,
 				flag: SceneHandler.Flag.ERROR
 			));
 		}
@@ -76,15 +81,13 @@ namespace lnbase.Base {
 		) {
 			Scenes.Add(GenerateScene(
 				id: id, text: text, name: name,
-				t: type ?? new GameScene.SceneType(Scenes), bg: bckg ?? DefaultBCKG,
-				br: bars ?? DefaultBARS, f: font ?? DefaultFONT,
+				t: type ?? new GameScene.SceneType(Scenes),
+				bg: bckg, br: bars, f: font,
 				flag: SceneHandler.Flag.MIDDLE
 			));
 		}
 
 		public void LoadContent(SceneBackground defBCKG, SceneBars defBARS, SpriteFont defFONT) {
-			if( defBCKG != null || DefaultBARS != null || defFONT != null )
-				return;
 			DefaultBCKG = defBCKG;
 			DefaultBARS = defBARS;
 			DefaultFONT = defFONT;
@@ -96,7 +99,7 @@ namespace lnbase.Base {
 			Scenes.Start( );
 		}
 
-		public void Quit(){
+		public void Quit() {
 			Parent.Exit( );
 		}
 

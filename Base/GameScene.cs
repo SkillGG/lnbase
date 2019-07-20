@@ -33,9 +33,9 @@ namespace lnbase.Base {
 			ID = id;
 			VALUES = new SceneValues(name, text);
 			TYPE = t;
-			BCKG = bg;
-			BARS = br;
-			FONT = f;
+			BCKG = bg ?? t.Parent.DefaultBCKG;
+			BARS = br ?? t.Parent.DefaultBARS;
+			FONT = f ?? t.Parent.DefaultFONT;
 			FLAG = flag;
 		}
 
@@ -63,6 +63,11 @@ namespace lnbase.Base {
 
 		public void Start() {
 			TYPE.Init(this);
+		}
+
+		public void Stop() {
+			TYPE.Dispose( );
+			TYPE = null;
 		}
 
 		public void Update(InputStates bef) {
@@ -107,17 +112,22 @@ namespace lnbase.Base {
 
 			public SceneHandler Parent { get; private set; }
 
+			private bool ConditionWait { get; set; }
+
+			private int UC_Count { get; set; }
+
 			public void Init(GameScene sv) {
-				Before( );
 				if( Period > 0 ) {
 					MainClock = new Timer(UpdateClock, sv, this.Period, this.Period);
 				} else
-					UpdateClock(null);
+					UpdateClick(sv);
 			}
 
 			public SceneType(SceneHandler sh) {
 				Period = 0;
 				Parent = sh;
+				Before = () => { };
+				After = () => { };
 				Update = (int cycle, SceneValues sv) => {
 					sv.SetVisible(sv.FullLength);
 					return true;
@@ -160,7 +170,11 @@ namespace lnbase.Base {
 				ConditionWait = false;
 			}
 
-			private bool ConditionWait { get; set; }
+			public void Dispose() {
+				Reset( );
+				MainClock?.Dispose( );
+				MainClock = null;
+			}
 
 			public void ConditionInit() {
 				ConditionWait = true;
@@ -177,15 +191,21 @@ namespace lnbase.Base {
 
 			public void SetCondition(Func<InputStates, SceneValues, bool> cond) { Condition = cond; }
 
-			private int UC_Count { get; set; }
+			private void UpdateClick(GameScene sv) {
+				Update(0, sv.VALUES);
+				Dispose( );
+				After( );
+				ConditionInit( );
+				return;
+			}
 
 			public void UpdateClock(object sv) {
 				GameScene scene = (GameScene) sv;
 				if( Update(UC_Count, scene.VALUES) ) {
-					MainClock.Dispose( );
-					MainClock = null;
+					Dispose( );
 					After( );
 					ConditionInit( );
+					return;
 				}
 				UC_Count++;
 			}

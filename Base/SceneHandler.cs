@@ -35,6 +35,7 @@ namespace lnbase.Base {
 		public void Next(GameScene ngs) {
 			if( allScenes.Contains(ngs) ) {
 				current = ngs.ID;
+				Current.Start( );
 			}
 		}
 
@@ -57,7 +58,6 @@ namespace lnbase.Base {
 			Next(this[Flag.FIRST] ?? allScenes[0]);
 			if( Current == null )
 				Terminate( );
-			Current.Start( );
 		}
 
 		public SceneHandler(GameBase gb) {
@@ -70,8 +70,6 @@ namespace lnbase.Base {
 		public SpriteFont DefaultFONT { get; private set; }
 
 		public void SetSceneDefaults(SceneBackground defBCKG, SceneBars defBARS, SpriteFont defFONT) {
-			if( defBCKG != null || DefaultBARS != null || defFONT != null )
-				return;
 			DefaultBCKG = defBCKG;
 			DefaultBARS = defBARS;
 			DefaultFONT = defFONT;

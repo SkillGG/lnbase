@@ -70,9 +70,11 @@ namespace lnbase.Base {
 			sb.Draw(Texture.Texture, dest, Texture.Source, Color.White);
 
 			// TODO: Implement name centering!
-			sb.DrawString(font, n, new Vector2(Name.X, Name.Y), nc ?? Color.White);
+			sb.DrawString(font, n, new Vector2(Name.X + dest.X, Name.Y + dest.Y), nc ?? Color.White);
 
-			DrawWrappedString(sb, font, t, Text, tc ?? Color.White);
+			DrawWrappedString(sb, font, t,
+			new Rectangle(Text.X + dest.X, Text.Y + dest.Y, Text.Width, Text.Height),
+			tc ?? Color.White);
 		}
 
 	}
