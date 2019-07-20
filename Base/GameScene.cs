@@ -20,6 +20,10 @@ namespace lnbase.Base {
 
 		private bool Locked { get; set; }
 
+		/// <summary>
+		/// Draws Scene
+		/// </summary>
+		/// <param name="sb"></param>
 		public void Draw(SpriteBatch sb) {
 			( BCKG ?? TYPE.Parent.DefaultBCKG )?.Draw(sb);
 			( BARS ?? TYPE.Parent.DefaultBARS )?.Draw(sb, FONT ?? TYPE.Parent.DefaultFONT,
@@ -43,20 +47,26 @@ namespace lnbase.Base {
 
 		public GameScene NextScene { get; private set; }
 
+		/// <summary>
+		/// Locks NextScene to currently seleted
+		/// <para>==== LOCK IS IRREMOVABLE ====</para>
+		/// </summary>
 		public void Lock() {
 			Locked = true;
 		}
 
+		/// <summary>
+		/// Changes next Scene (can be locked via .Lock)
+		/// </summary>
+		/// <param name="gs"></param>
 		public void Next(GameScene gs) {
 			if( !Locked )
 				NextScene = gs;
 		}
 
-		public void Next(GameBase.TerminateState t) {
-			if( !Locked )
-				NextScene = null;
-		}
-
+		/// <summary>
+		/// Changes scene from this to next one in Queue
+		/// </summary>
 		public void ShowNext() {
 			if( NextScene == null ) {
 				TYPE.Parent.Terminate( );
@@ -65,23 +75,39 @@ namespace lnbase.Base {
 			}
 		}
 
-		public void Condition(Func<InputStates, SceneValues, bool> condition) {
-			TYPE.SetCondition(condition);
-		}
+		/// <summary>
+		/// Changes next scenes condition
+		/// <para>When condition returns true next scene will be started</para>
+		/// </summary>
+		/// <param name="condition"></param>
+		public void Condition(Func<InputStates, SceneValues, bool> condition)
+			=> TYPE.SetCondition(condition);
 
-		public void Start() {
-			TYPE.Init(this);
-		}
+		/// <summary>
+		/// GameScene initialization (fires Before() and starts UpdateTimer)
+		/// </summary>
+		public void Start()
+			=> TYPE.Init(this);
 
+		/// <summary>
+		/// Stops running of whole Scene.
+		/// </summary>
 		public void Stop() {
 			TYPE.Dispose( );
 			TYPE = null;
 		}
 
+		/// <summary>
+		/// ConditionUPDATE
+		/// </summary>
+		/// <param name="bef"></param>
 		public void Update(InputStates bef) {
 			TYPE.ConditionClock(bef, this);
 		}
 
+		/// <summary>
+		/// Class to handle direct changes to Scene without direct access to Scene object
+		/// </summary>
 		public class SceneValues {
 
 			public string NAME { get; private set; }
@@ -96,6 +122,10 @@ namespace lnbase.Base {
 				VISIBLE = "";
 			}
 
+			/// <summary>
+			/// Set how many letters from full text will be viisble in text-box
+			/// </summary>
+			/// <param name="ln"></param>
 			public void SetVisible(int ln) {
 				if( ln >= FULL_TEXT.Length )
 					VISIBLE = FULL_TEXT;
@@ -106,6 +136,9 @@ namespace lnbase.Base {
 
 		}
 
+		/// <summary>
+		/// Class that control Scene behaviour.
+		/// </summary>
 		public class SceneBehaviour {
 
 			public Timer MainClock { get; private set; }
@@ -124,7 +157,12 @@ namespace lnbase.Base {
 
 			private int UC_Count { get; set; }
 
+			/// <summary>
+			/// Start of whole system
+			/// </summary>
+			/// <param name="sv"></param>
 			public void Init(GameScene sv) {
+				Before( );
 				if( Period > 0 ) {
 					MainClock = new Timer(UpdateClock, sv, this.Period, this.Period);
 				} else
@@ -173,22 +211,35 @@ namespace lnbase.Base {
 
 			}
 
+			/// <summary>
+			/// Resets Condition to its first value
+			/// </summary>
 			private void Reset() {
 				UC_Count = 0;
 				ConditionWait = false;
 			}
 
+			/// <summary>
+			/// Deletes clock.
+			/// </summary>
 			public void Dispose() {
 				Reset( );
 				MainClock?.Dispose( );
 				MainClock = null;
 			}
 
-			public void ConditionInit() {
-				ConditionWait = true;
-			}
+			/// <summary>
+			/// Start waiting for Condition() to return true to show next scene
+			/// </summary>
+			public void ConditionInit()
+				=> ConditionWait = true;
 
-			public void ConditionClock(InputStates b, GameScene gs) {
+			/// <summary>
+			/// Function that check results of Condition()
+			/// </summary>
+			/// <param name="b"></param>
+			/// <param name="gs"></param>
+			private void ConditionClock(InputStates b, GameScene gs) {
 				if( ConditionWait ) {
 					if( Condition(b, gs.VALUES) ) {
 						gs.ShowNext( );
@@ -197,8 +248,13 @@ namespace lnbase.Base {
 				}
 			}
 
-			public void SetCondition(Func<InputStates, SceneValues, bool> cond) { Condition = cond; }
-
+			public void SetCondition(Func<InputStates, SceneValues, bool> cond)
+				=> Condition = cond;
+			
+			/// <summary>
+			/// UpdateClock for ICW ( immidiate condition wait ) SceneBehaviour
+			/// </summary>
+			/// <param name="sv"></param>
 			private void UpdateClick(GameScene sv) {
 				Update(0, sv.VALUES);
 				Dispose( );
@@ -207,6 +263,10 @@ namespace lnbase.Base {
 				return;
 			}
 
+			/// <summary>
+			/// Funtion that each Period[ms] checks for result from Update()
+			/// </summary>
+			/// <param name="sv"></param>
 			public void UpdateClock(object sv) {
 				GameScene scene = (GameScene) sv;
 				if( Update(UC_Count, scene.VALUES) ) {

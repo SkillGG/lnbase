@@ -13,9 +13,6 @@ namespace lnbase.Base {
 
 		private bool Loaded { get; set; }
 
-		public enum TerminateState { ON }
-		public const TerminateState Terminate = TerminateState.ON;
-
 		public InputStates InputStates { get; private set; }
 
 		public bool Started { get; private set; }
@@ -103,7 +100,7 @@ namespace lnbase.Base {
 				flag: SceneHandler.Flag.END
 			));
 			AUTH = false;
-			Scenes.Last.Next(GameBase.Terminate);
+			Scenes.Last.Next(null);
 			Scenes.Last.Lock( );
 		}
 
