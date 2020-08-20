@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 
 namespace lnbase.Base {
+
 	public class GameBase {
 
 		public SceneHandler Scenes;
@@ -40,18 +41,21 @@ namespace lnbase.Base {
 		/// <param name="br">Scene Bar image and Name/Text-Box positions</param>
 		/// <param name="f">Text font</param>
 		/// <param name="flag">Scene flag (only works via .FirstScene/.EndScene/.ErrorScene)</param>
+		/// <param name="genfunc">Function that gets invoked on object after creating it.</param>
 		/// <returns>Newly created GameScene</returns>
 		public GameScene GenerateScene(
 			string id, string text, string name,
 			GameScene.SceneBehaviour t, SceneBackground bg, SceneBars br, SpriteFont f,
-			SceneHandler.Flag flag = SceneHandler.Flag.MIDDLE
+			SceneHandler.Flag flag = SceneHandler.Flag.MIDDLE, Action<GameScene> genfunc = null
 		) {
-			return new GameScene(id, text, name, t,
+			var ngs = new GameScene(id, text, name, t,
 				bg ?? t.Parent.DefaultBCKG,
 				br ?? t.Parent.DefaultBARS,
 				f ?? t.Parent.DefaultFONT,
 				AUTH ? flag : SceneHandler.Flag.MIDDLE
 			);
+			genfunc?.Invoke(ngs);
+			return ngs;
 		}
 
 		/// <summary>
@@ -69,7 +73,7 @@ namespace lnbase.Base {
 		) {
 			AUTH = true;
 			Scenes.Add(GenerateScene(
-				id: "first", text: text, name: name,
+				id: "0", text: text, name: name,
 				t: behav ?? new GameScene.SceneBehaviour(Scenes),
 				bg: bckg, br: bars, f: font,
 				flag: SceneHandler.Flag.FIRST
@@ -140,13 +144,13 @@ namespace lnbase.Base {
 		public void NewScene(
 			string id, string text = "", string name = "",
 			GameScene.SceneBehaviour behav = null, SceneBackground bckg = null, SceneBars bars = null,
-			SpriteFont font = null
+			SpriteFont font = null, Action<GameScene> generationFunc = null
 		) {
 			Scenes.Add(GenerateScene(
 				id: id, text: text, name: name,
 				t: behav ?? new GameScene.SceneBehaviour(Scenes),
 				bg: bckg, br: bars, f: font,
-				flag: SceneHandler.Flag.MIDDLE
+				flag: SceneHandler.Flag.MIDDLE, genfunc: generationFunc
 			));
 		}
 

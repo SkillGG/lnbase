@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using lnbase.Base;
 using System;
 using ITW.Exts;
+using System.Collections.Generic;
 
 namespace lnbase {
 	/// <summary>
@@ -54,7 +55,7 @@ namespace lnbase {
 
 		public void ChangeGameResolution(int? w = null, double? res = null, bool? FS = null, bool? BL = null) {
 			this.WIDTH = w ?? this.WIDTH;
-			this.HEIGHT = (int) ( w / RevertFactor(res) );
+			this.HEIGHT = (int) ( this.WIDTH / RevertFactor(res) );
 			this.FULLSCREEN = FS ?? this.FULLSCREEN;
 			this.BORDERLESS = BL ?? this.BORDERLESS;
 			CW = WIDTH;
@@ -138,28 +139,62 @@ namespace lnbase {
 			GameBase.LoadContent(sb, sr, sf);
 
 			GameBase.FirstScene(
-				name: "me",
+				name: "",
+				text: "",
+				behav: new GameScene.SceneBehaviour(GameBase.Scenes, 1)   // type each char at 150 speed
+			);
+
+			GameBase.NewScene(
+				"first",
+				name: "You",
 				text: "Why am I here?",
-				behav: new GameScene.SceneBehaviour(GameBase.Scenes, 150)   // type each char at 150 speed
+				behav: new GameScene.SceneBehaviour(GameBase.Scenes, 15)
 			);
 
 			GameBase.NewScene(
 				"second",
-				name: "You",
-				text: "I don't know",
+				name: "Girl A",
+				text: "I-I... I don't know",
+				behav: new GameScene.SceneBehaviour(GameBase.Scenes,
+					updatepace: 15,
+					upt: (int cycle, GameScene.SceneValues sv) => {     // each 50ms
+						if( sv.VISIBLE.Length == sv.FullLength - 1 ) {
+							return true;
+						} else if( sv.VISIBLE.Length < 6 ) {
+							if( (int) sv.MiscValues[0] % 5 == 0 )
+								sv.SetVisible(sv.VISIBLE.Length + 1);
+						} else {
+							sv.SetVisible(sv.VISIBLE.Length + 1);
+						}
+						sv.MiscValues[0] = (int) sv.MiscValues[0] + 1;
+						return false;
+					}
+				),
+				generationFunc: (GameScene gs) => { gs.VALUES.MiscValues.Insert(0, 0); }
+			// bckg: null // default
+			);
+
+			GameBase.NewScene(
+				"third",
+				name: "***",
+				text: "1 2 3...",
 				behav: new GameScene.SceneBehaviour(GameBase.Scenes,
 					updatepace: 50,
-					upt: (int cycle, GameScene.SceneValues sv) => {     // each 50ms
-
-						// return true = end of every scene
-						if( cycle >= 5 ) {
-							sv.SetVisible(sv.FullLength);
+					upt: (int cycle, GameScene.SceneValues sv) => {
+						InputStates i = new InputStates( );
+						if( cycle < 1 )
+							sv.SetVisible(1);
+						if( i.KeyUp(sv.BefInput, Keys.Right) )
+							sv.SetVisible(sv.VISIBLE.Length + 1);
+						sv.MiscValues[1] = (int) sv.MiscValues[1] + 1;
+						if( (int) sv.MiscValues[1] % 10  == 0 )
+							sv.SetVisible(sv.VISIBLE.Length + 1);
+						if( sv.VISIBLE.Length == sv.FullLength - 1 )
 							return true;
-						} else
-							return false;
+						return false;
 					}
-				)
-			// bckg: null // default
+				),
+				generationFunc: (GameScene gs) => { gs.VALUES.MiscValues.InsertRange(0, new List<object>( ) { 8, 0 }); }
 			);
 
 			GameBase.EndScene(
@@ -168,27 +203,16 @@ namespace lnbase {
 				behav: new GameScene.SceneBehaviour(GameBase.Scenes)
 			);
 
-			GameBase.Scenes.First.Next(GameBase.Scenes["second"]);
-			GameBase.Scenes["second"].Next(GameBase.Scenes.Last);
+			GameBase.Scenes.First.Next(GameBase.Scenes["first"]);
+			GameBase.Scenes["first"].Next(GameBase.Scenes["second"]);
+			GameBase.Scenes["second"].Next(GameBase.Scenes["third"]);
+			GameBase.Scenes["third"].Next(GameBase.Scenes.Last);
 
-			// Click condition function
-			bool Click(InputStates i, GameScene.SceneValues sv) {
-				InputStates ni = new InputStates( );
-				if( ni.MouseReleased(i).Button == MouseButton.LEFT )
-					return true;
-				return false;
-			}
-
-			bool Enter(InputStates i, GameScene.SceneValues sv) {
-				InputStates ni = new InputStates( );
-				if( ni.KeyUp(i, Keys.Enter) )
-					return true;
-				return false;
-			}
-
-			GameBase.Scenes.First.Condition(Enter);
-			GameBase.Scenes["second"].Condition(Enter);
-			GameBase.Scenes.Last.Condition(Click);
+			GameBase.Scenes.First.Condition(GameSceneConditions.ClickOrEnter);
+			GameBase.Scenes["first"].Condition(GameSceneConditions.ClickOrEnter);
+			GameBase.Scenes["second"].Condition(GameSceneConditions.ClickOrEnter);
+			GameBase.Scenes["third"].Condition(GameSceneConditions.ClickOrEnter);
+			GameBase.Scenes.Last.Condition(GameSceneConditions.ClickOrEnter);
 
 		}
 
